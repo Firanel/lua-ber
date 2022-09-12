@@ -136,8 +136,9 @@ end
 
 
 
-local function decode(value, cursor)
+local function decode(value, cursor, maxDepth)
   local i = cursor or 1 -- Cursor
+  depth = (depth or math.maxinteger) - 1
 
   -- Identifier octets
 
@@ -190,30 +191,25 @@ local function decode(value, cursor)
     i = i + length
   end
 
+  local children = nil
+  if constructed and maxDepth >= 0 then
+    children = {}
+    local cursor = 1
+    while cursor <= #data do
+      local r
+      r, cursor = decode(data, cursor, maxDepth)
+      table.insert(children, r)
+    end
+  end
 
   return {
     class = class,
     constructed = constructed,
     tag = tag,
     length = length,
-    data = data
+    data = data,
+    children = children,
   }, i
-end
-
-
-
-local function decodeToArray(value)
-  local res = {}
-
-  local cursor = 1
-
-  while cursor <= #value do
-    local r
-    r, cursor = decode(value, cursor)
-    table.insert(res, r)
-  end
-
-  return res
 end
 
 
@@ -221,7 +217,6 @@ end
 return {
   encode = encode,
   decode = decode,
-  decodeToArray = decodeToArray,
   identifier = identifier,
   length = length,
 }
