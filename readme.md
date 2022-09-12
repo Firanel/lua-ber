@@ -22,6 +22,13 @@ The BerObject:
 
 ### Encode
 
+Functions:
+```lua
+ber.identifier(options) -- BerObject (without data and length)
+ber.length(value) -- number (generates octet for indefinite form if nil)
+ber.encode(value) -- BerObject
+```
+
 Generate the identifier octets:
 ```lua
 local result = ber.identifier {
@@ -93,3 +100,24 @@ assert(ber.encode(obj) == ber.encode "Hello Steve")
 
 ### Decode
 
+Functions:
+```lua
+ber.decode(
+  value,         -- BER data as string
+  start,         -- Start index (default: 1)
+  recursionDepth -- Max recursion depth for deconstruction (default: math.maxinteger)
+)
+```
+
+`decode` always returns a BerObject:
+
+```lua
+assert(ber.decode(ber.encode "Hello") == {
+  class = 0,
+  constructed = false,
+  type = 4,
+  length = 5,
+  data = "Hello",
+  children = nil
+})
+```

@@ -205,7 +205,7 @@ local function decode(value, cursor, maxDepth)
   return {
     class = class,
     constructed = constructed,
-    tag = tag,
+    type = tag,
     length = length,
     data = data,
     children = children,
