@@ -108,7 +108,8 @@ local function encode(value)
       for i, v in ipairs(value) do
         res[i] = encode(v)
       end
-      return table.concat(res, "")
+      res = table.concat(res, "")
+      return identifier{type = Types.SEQUENCE} .. length(#res) .. res
     else
       if value.constructed == nil and constructedOnly[value.type] then
         value.constructed = true

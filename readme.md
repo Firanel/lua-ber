@@ -56,9 +56,12 @@ Automatic encoding is DER compliant.
 Strings are encoded as octet strings. If you wish to save a readable string a more specialized
 type, like UTF8String, should be used.
 
-Use tables with numbered indices to encode multiple elements in sequence:
+Use tables with numbered indices to automatically encode sequences:
 ```lua
-assert(ber.encode {"hello", 42} == ber.encode "hello" .. ber.encode(42))
+assert(ber.encode {"hello", 42} == ber.encode {
+  type = ber.Types.SEQUENCE,
+  data = ber.encode "hello" .. ber.encode(42)
+})
 ```
 
 If `constructed` is true and `children` is set, `encode` will first encode children and use the result as the data.
@@ -85,6 +88,7 @@ local obj = setmetatable({
 
 assert(ber.encode(obj) == ber.encode "Hello Steve")
 ```
+
 
 
 ### Decode
