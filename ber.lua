@@ -19,14 +19,21 @@ local Types = {
   NULL = 5,
   SEQUENCE = 16,
   SET = 17,
+  IA5String = 22,
+  DATE = 31,
+  TIME_OF_DAY = 32,
+  DATE_TIME = 33,
+  DURATION = 34,
+  OID_IRI = 35,
+  RELATIVE_OID_IRI = 36,
 }
 
 local constructedOnly = {
-  ["8"] = true,
-  ["11"] = true,
-  ["16"] = true,
-  ["17"] = true,
-  ["29"] = true,
+  [8] = true,
+  [11] = true,
+  [16] = true,
+  [17] = true,
+  [29] = true,
 }
 
 
@@ -72,25 +79,32 @@ end
 
 
 
-local function encode(value)
+local function encode(value, forceIdentifier)
+  local ident = forceIdentifier and function(o)
+    local t = {}
+    for k, v in pairs(o) do t[k] = v end
+    for k, v in pairs(forceIdentifier) do t[k] = v end
+    return identifier(t)
+  end or identifier
+
   local mt = getmetatable(value)
   local tober = mt and mt.__tober
   if tober then
     if type(tober) == "function" then
-      return encode(tober(value))
+      return encode(tober(value), forceIdentifier)
     else
-      return encode(tober)
+      return encode(tober, forceIdentifier)
     end
   end
 
   local t = type(value)
 
   if t == "nil" then
-    return identifier{type = Types.NULL} .. length(0)
+    return ident{type = Types.NULL} .. length(0)
   elseif t == "number" then
     if math.floor(value) == value then
       local len = bytesRequired(value)
-      local res = identifier{type = Types.INTEGER} .. length(len)
+      local res = ident{type = Types.INTEGER} .. length(len)
       if len > 0 then
         res = res .. string.pack(">i"..len, value)
       end
@@ -99,36 +113,49 @@ local function encode(value)
       error("Not implemented")
     end
   elseif t == "string" then
-    return identifier{type = Types.OCTET_STRING} .. length(#value) .. value
+    return ident{type = Types.OCTET_STRING} .. length(#value) .. value
   elseif t == "boolean" then
-    return identifier{type = Types.BOOLEAN} .. length(1) .. string.char(value and 1 or 0)
+    return ident{type = Types.BOOLEAN} .. length(1) .. string.char(value and 0xff or 0)
   elseif t == "table" then
     if value[1] then
-      local res = {}
+      local children = {}
       for i, v in ipairs(value) do
-        res[i] = encode(v)
+        children[i] = v
+        value[i] = nil
       end
-      res = table.concat(res, "")
-      return identifier{type = Types.SEQUENCE} .. length(#res) .. res
-    else
-      if value.constructed == nil and constructedOnly[value.type] then
-        value.constructed = true
+      value.children = children
+      if not value.type then
+        value.type = Types.SEQUENCE
       end
-      if value.constructed and value.children then
-        value.data = encode(value.children)
-        value.length = #value.data
-      end
+    end
 
-      if not value.length then
-        if not value.data then
-          value.data = ""
-          value.length = 0
-        else
-          value.length = #value.data
+    if value.constructed == nil and constructedOnly[value.type] then
+      value.constructed = true
+    end
+    if value.constructed and value.children then
+      local res = {}
+      if value.index then
+        for i, v in ipairs(value.children) do
+          res[i] = encode(v, {class = 2, type = i - 1})
+        end
+      else
+        for i, v in ipairs(value.children) do
+          res[i] = encode(v)
         end
       end
-      return identifier(value) .. length(value.length) .. value.data
+      value.data = table.concat(res, "")
+      value.length = #value.data
     end
+
+    if not value.length then
+      if not value.data then
+        value.data = ""
+        value.length = 0
+      else
+        value.length = #value.data
+      end
+    end
+    return ident(value) .. length(value.length) .. value.data
   else
     error("Type not supported: "..t)
   end
@@ -138,7 +165,7 @@ end
 
 local function decode(value, cursor, maxDepth)
   local i = cursor or 1 -- Cursor
-  depth = (depth or math.maxinteger) - 1
+  maxDepth = (maxDepth or math.maxinteger) - 1
 
   -- Identifier octets
 
@@ -219,4 +246,5 @@ return {
   decode = decode,
   identifier = identifier,
   length = length,
+  Types = Types,
 }

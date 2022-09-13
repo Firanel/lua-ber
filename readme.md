@@ -71,6 +71,17 @@ assert(ber.encode {"hello", 42} == ber.encode {
 })
 ```
 
+Tables with numbered indices may also contain BerObject properties:
+```lua
+assert(ber.encode {
+  type = ber.Types.SET,
+  1, 2, 3
+} == ber.encode {
+  type = ber.Types.SET,
+  children = {1, 2, 3}
+})
+```
+
 If `constructed` is true and `children` is set, `encode` will first encode children and use the result as the data.
 ```lua
 ber.encode {
@@ -82,6 +93,25 @@ ber.encode {
   type = ber.Types.SEQUENCE,
   children = {"First", 42}
 }
+```
+
+Constructed types may set `index` to `true` to auto index children:
+```lua
+assert(ber.encode {
+  index = true,
+  1, 2
+} == ber.encode {
+  {
+    class = 2,
+    type = 0,
+    data = string.byte(1)
+  },
+  {
+    class = 2,
+    type = 1,
+    data = string.byte(2)
+  }
+})
 ```
 
 The metatable index `__tober` can be used to customize encoding, by providing an encodable value
