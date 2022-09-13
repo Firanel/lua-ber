@@ -10,6 +10,13 @@ end
 
 
 
+local Class = {
+  Universal = 0,
+  Application = 1,
+  ContextSpecific = 2,
+  Private = 3
+}
+
 local Types = {
   EOC = 0,
   BOOLEAN = 1,
@@ -17,9 +24,31 @@ local Types = {
   BIT_STRING = 3,
   OCTET_STRING = 4,
   NULL = 5,
+  OBJECT_IDENTIFIER = 6,
+  Object_Descriptor = 7,
+  EXTERNAL = 8,
+  REAL = 9,
+  ENUMERATED = 10,
+  EMBEDDED_PDV = 11,
+  UTF8String = 12,
+  RELATIVE_OID = 13,
+  TIME = 14,
+
   SEQUENCE = 16,
   SET = 17,
+  NumericString = 18,
+  PrintableString = 19,
+  T61String = 20,
+  VideotexString = 21,
   IA5String = 22,
+  UTCTime = 23,
+  GeneralizedTime = 24,
+  GraphicString = 25,
+  VisibleString = 26,
+  GeneralString = 27,
+  UniversalString = 28,
+  CHARACTER_STRING = 29,
+  BMPString = 30,
   DATE = 31,
   TIME_OF_DAY = 32,
   DATE_TIME = 33,
@@ -247,4 +276,5 @@ return {
   identifier = identifier,
   length = length,
   Types = Types,
+  Class = Class,
 }

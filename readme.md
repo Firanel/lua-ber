@@ -102,12 +102,12 @@ assert(ber.encode {
   1, 2
 } == ber.encode {
   {
-    class = 2,
+    class = ber.Class.ContextSpecific,
     type = 0,
     data = string.byte(1)
   },
   {
-    class = 2,
+    class = ber.Class.ContextSpecific,
     type = 1,
     data = string.byte(2)
   }
