@@ -7,7 +7,7 @@ BER encoding and decoding in pure Lua.
 ## Compatability
 
 
-Due to heavy use of binary oparators, this package is only compatible with Lua 5.4 or higher.
+Due to heavy use of binary oparators, this package is only compatible with Lua 5.3 or higher.
 
 
 ## Usage
