@@ -1,9 +1,13 @@
 # Lua BER encoding / decoding
 
 
-!!! Work in progress
-
 BER encoding and decoding in pure Lua.
+
+
+## Compatability
+
+
+Due to heavy use of binary oparators, this package is only compatible with Lua 5.4 or higher.
 
 
 ## Usage
@@ -60,8 +64,7 @@ assert(result == ber.encode(4660))
 ```
 
 Automatic encoding is DER compliant.  
-Strings are encoded as octet strings. If you wish to save a readable string a more specialized
-type, like UTF8String, should be used.
+Strings are encoded as octet strings.
 
 Use tables with numbered indices to automatically encode sequences:
 ```lua
@@ -86,11 +89,6 @@ If `constructed` is true and `children` is set, `encode` will first encode child
 ```lua
 ber.encode {
   type = ber.Types.SEQUENCE, -- constructed is implied with sequence type
-  children = "I'm an only child"
-}
-
-ber.encode {
-  type = ber.Types.SEQUENCE,
   children = {"First", 42}
 }
 ```
